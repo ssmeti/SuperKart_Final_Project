@@ -3,8 +3,10 @@
 import streamlit as st
 import requests
 import numpy as np
+import pandas as pd
 # Base URL of the Flask backend
-BACKEND_URL = "http://backend:7860"
+import os
+BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:7860")
 
 # App Title
 st.title("🛒 SuperKart Sales Forecasting App")
@@ -49,10 +51,14 @@ if st.button("Predict", type='primary'):
 
     if response.status_code == 200:
         result = response.json()
-        predicted_sales = result["Sales"]
+        predicted_sales = result["Predicted_Sales"]
         st.success(f"Predicted Product Store Sales Total: ₹{predicted_sales:.2f}")
     else:
-        st.error("Unable to connect to the prediction API.")
+        try:
+            error_msg = response.json().get("error", response.text)
+        except ValueError:
+            error_msg = response.text
+        st.error(f"Prediction failed ({response.status_code}): {error_msg}")
 
 # Batch Prediction
 st.subheader("Batch Prediction")
