@@ -5,13 +5,8 @@ import requests
 import numpy as np
 import pandas as pd
 # Base URL of the Flask backend
-<<<<<<< HEAD
 import os
 BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:7860")
-=======
-BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:7860")
-#BACKEND_URL = "http://backend:7860"
->>>>>>> 54a2c5f88cd01e7be4507fa47992ed37ddae9284
 
 # App Title
 st.title("🛒 SuperKart Sales Forecasting App")
