@@ -64,7 +64,44 @@ def predict_sales():
     except Exception as e:
         print("❌ Error during prediction:", str(e))
         return jsonify({'error': f"Prediction failed: {str(e)}"}), 500
+@superkart_api.post('/v1/predictbatch')
+def predict_sales_batch():
+    try:
+        # Accept an uploaded CSV file, or a JSON list of records
+        if 'file' in request.files:
+            df = pd.read_csv(request.files['file'])
+        else:
+            df = pd.DataFrame(request.get_json())
 
+        required_fields = [
+            'Product_Weight', 'Product_Sugar_Content', 'Product_Allocated_Area',
+            'Product_MRP', 'Store_Size', 'Store_Location_City_Type',
+            'Store_Type', 'Store_Age_Years', 'Product_Type_Category'
+        ]
+        missing_fields = [f for f in required_fields if f not in df.columns]
+        if missing_fields:
+            return jsonify({'error': f"Missing columns: {missing_fields}"}), 400
+
+        # Same transforms and column order as /v1/predict
+        input_df = pd.DataFrame({
+            'Product_Weight': df['Product_Weight'].astype(float),
+            'Product_Sugar_Content': df['Product_Sugar_Content'],
+            'Product_Allocated_Area_Log': np.log1p(df['Product_Allocated_Area'].astype(float)),
+            'Product_MRP': df['Product_MRP'].astype(float),
+            'Store_Size': df['Store_Size'],
+            'Store_Location_City_Type': df['Store_Location_City_Type'],
+            'Store_Type': df['Store_Type'],
+            'Store_Age_Years': df['Store_Age_Years'].astype(int),
+            'Product_Type_Category': df['Product_Type_Category']
+        })
+
+        predictions = model.predict(input_df)
+        return jsonify({'Predicted_Sales': [float(p) for p in predictions]})
+
+    except Exception as e:
+        print("❌ Error during batch prediction:", str(e))
+        return jsonify({'error': f"Batch prediction failed: {str(e)}"}), 500
+        
 # Run the app (for local testing only)
 if __name__ == '__main__':
     superkart_api.run(debug=True)
