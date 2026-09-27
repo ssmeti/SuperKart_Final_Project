@@ -4,7 +4,8 @@ import streamlit as st
 import requests
 import numpy as np
 # Base URL of the Flask backend
-BACKEND_URL = "http://backend:7860"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:7860")
+#BACKEND_URL = "http://backend:7860"
 
 # App Title
 st.title("🛒 SuperKart Sales Forecasting App")
